@@ -109,6 +109,12 @@ namespace Pax
       foreach (var device in PaxConfig.deviceMap)
         device.StartCapture();
 
+#if TIMING
+      // Sleep to let it warm up (milliseconds)
+      System.Threading.Thread.Sleep(500);
+      Performance.Instance.StartSession();
+#endif
+
       return 0;
     }
 
@@ -340,8 +346,25 @@ namespace Pax
           Console.ForegroundColor = ConsoleColor.Gray;
           Console.WriteLine(")");
           Console.ForegroundColor = tmp;
+          var handler = new PacketArrivalEventHandler(PaxConfig.interface_lead_handler_obj[idx].packetHandler);
           PaxConfig.deviceMap[idx].OnPacketArrival +=
-            PaxConfig.interface_lead_handler_obj[idx].packetHandler;
+#if TIMING
+            // Wrap the packet handler so we can count the number of packets and time the processing
+            (sender, e) =>
+            {
+              // Increment packet count
+              Performance.Instance.CountPacket();
+
+              // Process the packet, timing it
+              Stopwatch sw = Stopwatch.StartNew();
+              handler.Invoke(sender, e);
+              sw.Stop();
+              // Record the measurement
+              Performance.Instance.AddMeasurement(sw.Elapsed);
+            };
+#else
+            handler;
+#endif
         }
       }
     }
@@ -361,6 +384,11 @@ namespace Pax
 
       Console.ResetColor();
       Console.WriteLine ("Terminating");
+
+#if TIMING
+      Performance.Instance.StopSession();
+      Performance.Instance.PrintSummary();
+#endif
     }
   }
 }
