@@ -1,12 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- Hand-written .csproj file, based on instructions at https://msdn.microsoft.com/en-us/library/dd576348.aspx-->
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
   <PropertyGroup>
     <AssemblyName>Examples</AssemblyName>
     <OutputPath>Bin\</OutputPath>
     <OutputType>Library</OutputType>
+    <ProjectGuid>{75A28AF5-50C2-4D17-86CF-3A8BE44FD107}</ProjectGuid>
     <DefineConstants>TIMING</DefineConstants>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -45,7 +51,7 @@
     <Compile Include="Nat\UdpNAT.cs" />
     <Compile Include="Test.cs" />
   </ItemGroup>
-<!--
+  <!--
   <Target Name="Build">
     <MakeDir Directories="$(OutputPath)" Condition="!Exists('$(OutputPath)')" />
     <Csc Sources="@(Compile)" OutputAssembly="$(OutputPath)$(AssemblyName).exe" />
