@@ -353,14 +353,14 @@ namespace Pax
             (sender, e) =>
             {
               // Increment packet count
-              Performance.Instance.CountPacket();
+              Performance.Instance.CountPacket(e.Packet.Data.Length);
 
               // Process the packet, timing it
               Stopwatch sw = Stopwatch.StartNew();
               handler.Invoke(sender, e);
               sw.Stop();
               // Record the measurement
-              Performance.Instance.AddMeasurement(sw.Elapsed);
+              Performance.Instance.AddMeasurement((int)(sw.ElapsedTicks * (1000000000M / ((decimal)Stopwatch.Frequency)))); // In nanoseconds
             };
 #else
             handler;
@@ -379,6 +379,8 @@ namespace Pax
         //  of 1s, the program shuts down immediately.
         device.StopCaptureTimeout = TimeSpan.FromSeconds(1);
 
+        // FIXME get errors when other threads try to send packets after the device is closed.
+        //  Could Deregister handler, wait, then close device?
         device.Close();
       }
 

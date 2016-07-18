@@ -7,6 +7,7 @@ using System.Text;
 
 namespace Pax
 {
+  // FIXME this class doesn't worry about concurrency
   internal sealed class Performance
   {
     public const int PacketSkipCount = 100;
@@ -16,6 +17,7 @@ namespace Pax
     private LinkedList<long> MeasurementLog = new LinkedList<long>();
     private Stopwatch sessionStopwatch;
     private int packetCount = 0;
+    private int bytesCount = 0;
 
     private Performance()
     {
@@ -34,15 +36,18 @@ namespace Pax
       sessionStopwatch.Stop();
     }
 
-    public void AddMeasurement(TimeSpan elapsed)
+    public void AddMeasurement(long elapsed)
     {
-      MeasurementLog.AddLast(elapsed.Ticks);
+      MeasurementLog.AddLast(elapsed);
     }
 
-    public void CountPacket()
+    public void CountPacket(int size = 0)
     {
       if (sessionStopwatch != null)
+      {
         packetCount++;
+        bytesCount += size;
+      }
     }
 
     public void PrintSummary()
