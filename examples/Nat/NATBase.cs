@@ -79,6 +79,10 @@ namespace Pax.Examples.Nat
       else
         forwardingDecision = InsideToOutside(packet, incomingNetworkInterface);
 
+#if DEBUG
+      Console.WriteLine("Processed packet ({0}B/{1}B/{2}B)", packet.LinkPacket.Bytes.Length, packet.NetworkPacket.Bytes.Length, packet.TransportPacket.Bytes.Length);
+#endif
+
       return forwardingDecision;
     }
 

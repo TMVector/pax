@@ -91,6 +91,11 @@ namespace Pax.Examples.Nat
     /// <returns>A <see cref="ForwardingDecision"/> for the packet.</returns>
     override public ForwardingDecision process_packet(int incomingNetworkInterface, ref Packet packet)
     {
+
+#if DEBUG
+      Console.WriteLine("Received packet ({0}B)", packet.Bytes.Length);
+#endif
+
       if (packet is EthernetPacket)
       {
         if (packet.PayloadPacket is IpPacket)

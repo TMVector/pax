@@ -4,7 +4,7 @@
   <PropertyGroup>
     <AssemblyName>Pax</AssemblyName>
     <OutputPath>Bin\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TIMING</DefineConstants>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

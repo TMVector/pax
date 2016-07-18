@@ -202,6 +202,56 @@ def test():
 
     net.stop()
 
+def perftest():
+    "Test the performance of the NAT"
+    # Create the network and initialise for testing:
+    net = createNetwork(n=2)
+
+    # Provide CLI access if requested
+    if config.cli_first:
+        CLI(net)
+
+    print ""
+    print "======================================================================"
+    print "= Please make sure you have built Pax with TIMING and no DEBUG flags ="
+    print "======================================================================"
+    print ""
+
+    # Names of the hosts we are interested in
+    nat0 = "nat0"
+    out0 = "out0"
+    in1 = "in1"
+    in2 = "in2"
+
+    # Start the Pax NAT process on the NAT node:
+    # Start it in a separate terminal so that we can see the output in real time.
+    print "Starting Pax NAT process on %s:" % nat0
+    cmd = 'Bin/Pax.exe examples/nat_wiring.json examples/Bin/Examples.dll'
+    if config.X_windows:
+        cmd = 'x-terminal-emulator -e \'%s\' &' % (cmd)
+        runCmd(net, nat0, cmd)
+    else:
+        sendCmd(net, nat0, cmd)
+
+    ## Test TCP performance
+    print "Testing TCP throughput between %s and %s:" % (in1, out0)
+    # Set up the iperf server
+    runCmd(net, out0, "iperf -s &")
+    # Start the test
+    runCmd(net, in1, "iperf -c %s" % (ip(net, out0))) # -t time -w window_size -i display_interval -P num_connections
+
+    ## Test UDP performance
+    print "Testing UDP throughput between %s and %s:" % (in1, out0)
+    # Set up the iperf server
+    runCmd(net, out0, "iperf -s -u &")
+    # Start the test
+    runCmd(net, in1, "iperf -u -c %s -b %s" % (ip(net, out0), "100m")) # -t time -w window_size -i display_interval -P num_connections -b bandwidth
+
+    if config.hold_open:
+        CLI(net)
+
+    net.stop()
+
 # List topologies defined in this file for Mininet
 topos = { 'nat': (lambda: NatTopo())}
 
@@ -315,5 +365,7 @@ if __name__ == '__main__':
         run()
     elif config.action == "test":
         test()
+    elif config.action == "perftest"
+        perftest()
     else:
         print "Unknown action"
