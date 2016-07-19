@@ -365,7 +365,7 @@ if __name__ == '__main__':
         run()
     elif config.action == "test":
         test()
-    elif config.action == "perftest"
+    elif config.action == "perftest":
         perftest()
     else:
         print "Unknown action"
