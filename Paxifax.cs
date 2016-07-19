@@ -97,7 +97,19 @@ namespace Pax {
         var device = PaxConfig.deviceMap[out_port];
         if (packet is EthernetPacket)
           ((EthernetPacket)packet).SourceHwAddress = device.MacAddress;
-        device.SendPacket(packet);
+        try
+        {
+          device.SendPacket(packet);
+        }
+        catch (SharpPcap.DeviceNotReadyException ex)
+        {
+          Console.WriteLine("Caught device not ready exception.");
+        }
+        catch (SharpPcap.PcapException ex)
+        {
+          Console.WriteLine("PcapException caught.");
+          Console.WriteLine(ex.Message.Split('\n')[0]);
+        }
 #if DEBUG
         Debug.WriteLine(PaxConfig.deviceMap[out_port].Name);
       } else {

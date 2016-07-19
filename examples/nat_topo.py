@@ -233,19 +233,21 @@ def perftest():
     else:
         sendCmd(net, nat0, cmd)
 
+    ## Test UDP performance
+    print "Testing UDP throughput between %s and %s:" % (in1, out0)
+    # Set up the iperf server
+    runCmd(net, out0, "iperf -s -u -i 1 &") # -i display_interval
+    # Start the test
+    print runCmd(net, in1, "iperf -c %s -M 500 -t 30 -u -b 350m" % (ip(net, out0))) # -t time -P num_connections -b bandwidth
+
     ## Test TCP performance
     print "Testing TCP throughput between %s and %s:" % (in1, out0)
     # Set up the iperf server
     runCmd(net, out0, "iperf -s &")
     # Start the test
-    runCmd(net, in1, "iperf -c %s" % (ip(net, out0))) # -t time -w window_size -i display_interval -P num_connections
+    print runCmd(net, in1, "iperf -c %s -M 736 -t 30" % (ip(net, out0))) # -t time -w window_size -i display_interval -P num_connections
 
-    ## Test UDP performance
-    print "Testing UDP throughput between %s and %s:" % (in1, out0)
-    # Set up the iperf server
-    runCmd(net, out0, "iperf -s -u &")
-    # Start the test
-    runCmd(net, in1, "iperf -u -c %s -b %s" % (ip(net, out0), "100m")) # -t time -w window_size -i display_interval -P num_connections -b bandwidth
+    # FIXME can see bandwidth from iperf output, but can't see Pax stats
 
     if config.hold_open:
         CLI(net)

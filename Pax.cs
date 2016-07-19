@@ -105,15 +105,18 @@ namespace Pax
 
       print_heading("Starting");
 
+#if TIMING
+      Performance.Instance.StartSession();
+#endif
+
       // FIXME accept a -j parameter to limit number of threads?
       foreach (var device in PaxConfig.deviceMap)
         device.StartCapture();
 
-#if TIMING
-      // Sleep to let it warm up (milliseconds)
-      System.Threading.Thread.Sleep(500);
-      Performance.Instance.StartSession();
-#endif
+      AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+      {
+        
+      };
 
       return 0;
     }
@@ -348,7 +351,13 @@ namespace Pax
           Console.ForegroundColor = tmp;
           var handler = new PacketArrivalEventHandler(PaxConfig.interface_lead_handler_obj[idx].packetHandler);
           PaxConfig.deviceMap[idx].OnPacketArrival +=
-#if TIMING
+#if MOREDEBUG
+            (sender, e) =>
+            {
+              Console.WriteLine("Packet length {0} on {1}", e.Packet.Data.Length, e.Device.Name);
+              handler.Invoke(sender, e);
+            };
+#elif TIMING
             // Wrap the packet handler so we can count the number of packets and time the processing
             (sender, e) =>
             {
@@ -356,11 +365,11 @@ namespace Pax
               Performance.Instance.CountPacket(e.Packet.Data.Length);
 
               // Process the packet, timing it
-              Stopwatch sw = Stopwatch.StartNew();
+              long start = Performance.Instance.GetTimestamp();
               handler.Invoke(sender, e);
-              sw.Stop();
+              long end = Performance.Instance.GetTimestamp();
               // Record the measurement
-              Performance.Instance.AddMeasurement((int)(sw.ElapsedTicks * (1000000000M / ((decimal)Stopwatch.Frequency)))); // In nanoseconds
+              Performance.Instance.AddMeasurement(start, end, e.Packet.Data.Length); // In nanoseconds
             };
 #else
             handler;
@@ -389,7 +398,11 @@ namespace Pax
 
 #if TIMING
       Performance.Instance.StopSession();
-      Performance.Instance.PrintSummary();
+      try {
+        Performance.Instance.PrintSummary();
+      } catch (Exception ex) {
+        Console.WriteLine(ex);
+      }
 #endif
     }
   }
